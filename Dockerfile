@@ -15,22 +15,6 @@ WORKDIR /apis
 
 RUN mkdir wars
 
-RUN git clone https://github.com/CDECatapult/DSPRODUCTCATALOG2.git
-
-WORKDIR DSPRODUCTCATALOG2
-
-RUN git checkout 59b2c360bc264b3e893548df739b59348a09720d; \
-    sed -i 's/jdbc\/sample/jdbc\/pcatv2/g' ./src/main/resources/META-INF/persistence.xml; \
-    sed -i 's/<provider>org\.eclipse\.persistence\.jpa\.PersistenceProvider<\/provider>/ /g' ./src/main/resources/META-INF/persistence.xml; \
-    sed -i 's/<property name="eclipselink\.ddl-generation" value="drop-and-create-tables"\/>/ /g' ./src/main/resources/META-INF/persistence.xml; \
-    sed -i 's/<property name="eclipselink\.logging\.level" value="FINE"\/>/ /g' ./src/main/resources/META-INF/persistence.xml; \
-    if [ -f "./DSPRODUCTORDERING/src/main/java/org/tmf/dsmapi/settings.properties" ]; then mv ./DSPRODUCTORDERING/src/main/java/org/tmf/dsmapi/settings.properties ./DSPRODUCTORDERING/src/main/resources/settings.properties; fi; \
-    grep -F "<property name=\"javax.persistence.schema-generation.database.action\" value=\"create\"/>" ./src/main/resources/META-INF/persistence.xml || sed -i 's/<\/properties>/\t<property name=\"javax.persistence.schema-generation.database.action\" value=\"create\"\/>\n\t\t<\/properties>/g' ./src/main/resources/META-INF/persistence.xml; \
-    mvn install; \
-    mv ./target/DSProductCatalog.war ../wars/;
-
-WORKDIR ../
-
 # Next api Docker
 RUN git clone https://github.com/FIWARE-TMForum/DSPRODUCTORDERING.git
 
