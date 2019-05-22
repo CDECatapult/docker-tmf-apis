@@ -15,12 +15,11 @@ WORKDIR /apis
 
 RUN mkdir wars
 
-RUN git clone https://github.com/CDECatapult/DSPRODUCTCATALOG2.git
+RUN git clone -b 'v7.0.0' --single-branch --depth 1 https://github.com/CDECatapult/DSPRODUCTCATALOG2.git
 
 WORKDIR DSPRODUCTCATALOG2
 
-RUN git checkout 59b2c360bc264b3e893548df739b59348a09720d; \
-    sed -i 's/jdbc\/sample/jdbc\/pcatv2/g' ./src/main/resources/META-INF/persistence.xml; \
+RUN sed -i 's/jdbc\/sample/jdbc\/pcatv2/g' ./src/main/resources/META-INF/persistence.xml; \
     sed -i 's/<provider>org\.eclipse\.persistence\.jpa\.PersistenceProvider<\/provider>/ /g' ./src/main/resources/META-INF/persistence.xml; \
     sed -i 's/<property name="eclipselink\.ddl-generation" value="drop-and-create-tables"\/>/ /g' ./src/main/resources/META-INF/persistence.xml; \
     sed -i 's/<property name="eclipselink\.logging\.level" value="FINE"\/>/ /g' ./src/main/resources/META-INF/persistence.xml; \
