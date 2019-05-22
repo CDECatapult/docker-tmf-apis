@@ -1,0 +1,69 @@
+version: 2
+jobs:
+  docker-build:
+    docker:
+      - image: docker:18.01.0-ce-git
+    steps:
+      - checkout
+
+      - setup_remote_docker
+
+      - run:
+          name: Login to docker
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+
+      - run:
+          name: Build the docker image
+          command: |
+            docker build -t docker-tmf-apis .
+
+      - run:
+          name: Tag the docker image
+          command: |
+            docker tag docker-tmf-apis digicatsynch/docker-tmf-apis:$CIRCLE_SHA1
+            docker tag docker-tmf-apis digicatsynch/docker-tmf-apis:ci-$CIRCLE_BUILD_NUM
+            docker tag docker-tmf-apis digicatsynch/docker-tmf-apis:${CIRCLE_BRANCH##feature/}
+
+      - run:
+          name: Push the docker image
+          command: |
+            docker push digicatsynch/docker-tmf-apis:$CIRCLE_SHA1
+            docker push digicatsynch/docker-tmf-apis:ci-$CIRCLE_BUILD_NUM
+            docker push digicatsynch/docker-tmf-apis:${CIRCLE_BRANCH##feature/}
+
+  release-version:
+    docker:
+      - image: docker:18.01.0-ce-git
+    steps:
+      - checkout
+
+      - setup_remote_docker
+
+      - run:
+          name: Login to docker
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+
+      - run:
+          name: Build the docker image
+          command: |
+            docker build -t digicatsynch/docker-tmf-apis:${CIRCLE_TAG##v} .
+
+      - run:
+          name: Push the docker image
+          command: |
+            docker push digicatsynch/docker-tmf-apis:${CIRCLE_TAG##v}
+workflows:
+  version: 2
+  logic-proxy:
+    jobs:
+      - docker-build:
+  tagged-build:
+    jobs:
+      - release-version:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
