@@ -10,11 +10,6 @@ DBHOST = getenv("MYSQL_HOST", "localhost")
 DBPORT = "3306"
 
 APIS = [{
-         "bbdd": "DSPRODUCTCATALOG2",
-         "war": "DSProductCatalog.war",
-         "root": "DSProductCatalog",
-         "resourcename": "jdbc/pcatv2"},
-        {
          "bbdd": "DSPRODUCTORDERING",
          "war": "DSProductOrdering.war",
          "root": "DSProductOrdering",
@@ -82,4 +77,3 @@ for api in APIS:
 elapsed_time = time.time() - start_time
 print(elapsed_time)
 cd("..")
-

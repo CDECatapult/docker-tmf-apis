@@ -15,9 +15,8 @@ fi
 
 ############################################################################################
 
-function create_tables { 
+function create_tables {
     echo "Creating Database tables"
-    mysql -u root --password=${MYSQL_ROOT_PASSWORD} -h ${MYSQL_HOST} -e "CREATE DATABASE IF NOT EXISTS DSPRODUCTCATALOG2;"
 
     mysql -u root --password=${MYSQL_ROOT_PASSWORD} -h ${MYSQL_HOST} -e "CREATE DATABASE IF NOT EXISTS DSPRODUCTORDERING;"
 

@@ -1,37 +1,22 @@
 version: '3'
 
 services:
-    apis_db:
-        image: mysql:latest
-        ports:
-            - "3333:3306"
-        volumes:
-            - ./apis-data:/var/lib/mysql
-        networks:
-            main:
-        environment:
-            - MYSQL_ROOT_PASSWORD=my-secret-pw
-
-    apis:
-        image: conwetlab/biz-ecosystem-apis:develop
-        ports:
-            - "4848:4848"
-            - "8080:8080"
-        links:
-            - apis_db
-        depends_on:
-            - apis_db
-        networks:
-            main:
-                aliases:
-                    - apis.docker
-        volumes:
-            - ./apis-wars:/apis/wars-ext
-            - ./apis-config:/etc/default/tmf/
-        environment:
-            - MYSQL_ROOT_PASSWORD=my-secret-pw
-            - MYSQL_HOST=apis_db
+  apis:
+    build: .
+    restart: always
+    ports:
+      - "4848:4848"
+      - "8080:8080"
+    networks:
+      synchronicity:
+        aliases:
+          - apis.docker
+    volumes:
+      - ./apis-config:/etc/default/tmf/
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_HOST=mysql
 
 networks:
-    main:
-        external: true
+  synchronicity:
+    external: true
