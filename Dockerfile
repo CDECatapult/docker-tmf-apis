@@ -127,4 +127,8 @@ COPY ./apis-entrypoint.py /
 EXPOSE 4848
 EXPOSE 8080
 
+# ENV PATH=$PATH:/glassfish4/glassfish/bin
+# RUN asadmin start-domain
+
 ENTRYPOINT ["/entrypoint.sh"]
+# ENTRYPOINT [ "/apis-entrypoint.py" ]
