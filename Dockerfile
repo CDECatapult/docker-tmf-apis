@@ -122,7 +122,7 @@ RUN mkdir wars-ext
 VOLUME ["/apis/wars-ext", "/etc/default/tmf/"]
 
 COPY ./entrypoint.sh /
-COPY ./apis-entrypoint.py /
+COPY ./deploy-api.py /
 
 EXPOSE 4848
 EXPOSE 8080
