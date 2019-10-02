@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 ################################## ENVIRONMENT VARIABLES NEEDED ############################
 # if [[ -z ${MYSQL_ROOT_PASSWORD} ]];

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Credits of this code to @Rock_Neurotiko
-from sh import asadmin, cd
+from sh import asadmin, cd, sed
 from os import getenv
 import time
 import sys
@@ -15,44 +15,6 @@ DBUSER = getenv("MYSQL_USER")
 DBPWD = getenv("MYSQL_PASSWORD")
 DBHOST = getenv("MYSQL_HOST")
 DBPORT = getenv("MYSQL_PORT", "3306")
-
-print("DBPORT: {}".format(DBPORT))
-
-# APIS = [{
-#          "bbdd": "DSPRODUCTORDERING",
-#          "war": "DSProductOrdering.war",
-#          "root": "DSProductOrdering",
-#          "resourcename": "jdbc/podbv2"},
-#         {
-#          "bbdd": "DSPRODUCTINVENTORY",
-#          "war": "DSProductInventory.war",
-#          "root": "DSProductInventory",
-#          "resourcename": "jdbc/pidbv2"},
-#         {
-#          "bbdd": "DSPARTYMANAGEMENT",
-#          "war": "DSPartyManagement.war",
-#          "root": "DSPartyManagement",
-#          "resourcename": "jdbc/partydb"},
-#         {
-#          "bbdd": "DSBILLINGMANAGEMENT",
-#          "war": "DSBillingManagement.war",
-#          "root": "DSBillingManagement",
-#          "resourcename": "jdbc/bmdbv2"},
-#         {
-#          "bbdd": "DSCUSTOMER",
-#          "war": "DSCustomerManagement.war",
-#          "root": "DSCustomerManagement",
-#          "resourcename": "jdbc/customerdbv2"},
-#         {
-#          "bbdd": "DSUSAGEMANAGEMENT",
-#          "war": "DSUsageManagement.war",
-#          "root": "DSUsageManagement",
-#          "resourcename": "jdbc/usagedbv2"}]
-
-# APIS = [{"bbdd": "DSPRODUCTORDERING",
-#          "war": "DSProductOrdering.war",
-#          "root": "DSProductOrdering",
-#          "resourcename": "jdbc/podbv2"}]
 
 APIS = {
     "DSPRODUCTORDERING": {
@@ -90,23 +52,33 @@ APIS = {
 
 def pool(name, user, pwd, url):
     if name not in asadmin("list-jdbc-connection-pools").splitlines():
-        asadmin("create-jdbc-connection-pool",
-                "--restype",
-                "java.sql.Driver",
-                "--driverclassname",
-                "com.mysql.jdbc.Driver",
-                "--property",
-                "user={}:password={}:URL={}".format(
-                    user, pwd, url.replace(":", "\:")),
-                name)
-        print('JDBC connection pool {} created'.format(name))
+        try:
+            asadmin("create-jdbc-connection-pool",
+                    "--restype",
+                    "java.sql.Driver",
+                    "--driverclassname",
+                    "com.mysql.jdbc.Driver",
+                    "--property",
+                    "user={}:password={}:URL={}".format(
+                        user, pwd, url.replace(":", "\:")),
+                    name)
+            print('JDBC connection pool {} created'.format(name))
+        except Exception as e:
+            print('JDBC connection pool {} creation failed'.format(name))
+            print(e)
+            exit(1)
 
 
 # asadmin create-jdbc-resource --connectionpoolid <poolname> <jndiname>
 def resource(name, pool):
     if name not in asadmin("list-jdbc-resources").splitlines():
-        asadmin("create-jdbc-resource", "--connectionpoolid", pool, name)
-        print('JDBC resource {} created'.format(name))
+        try:
+            asadmin("create-jdbc-resource", "--connectionpoolid", pool, name)
+            print('JDBC resource {} created'.format(name))
+        except Exception as e:
+            print('JDBC resource {} creation failed'.format(name))
+            print(e)
+            exit(1)
 
 
 def generate_mysql_url(db):
@@ -127,13 +99,18 @@ try:
     asadmin("deploy", "--force", "true", "--contextroot",
             api.get('root'), "--name", api.get('root'), api.get('war'))
     print('API {} deployed'.format(API_NAME))
+    # Attempt to dial down logging
+    sed("-i", 
+        "s/java.util.logging.ConsoleHandler.level=FINEST/java.util.logging.ConsoleHandler.level=WARNING/g",
+        "/glassfish4/glassfish/domains/domain1/config/logging.properties")
+    
 except Exception as e:
-    print(e)
     print('API {} could not be deployed'.format(API_NAME))
+    print(e)
+    exit(1)
 
 elapsed_time = time.time() - start_time
 print(elapsed_time)
 cd("..")
 
 asadmin("stop-domain")
-# asadmin("start-domain", "--verbose")
