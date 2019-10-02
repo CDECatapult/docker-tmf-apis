@@ -1,22 +1,161 @@
-version: '3'
+version: '3.7'
+
+x-mysql-service:
+  &default-mysql-service
+  image: mysql:5.7.27
+  networks:
+    - tmf-apis
+
+x-app-service:
+  &default-app-service
+  image: tmf-apis:latest
+  restart: always
+  ports:
+    - "4848"
+    - "8080"
+  networks:
+    - tmf-apis
+  volumes:
+    - ./apis-config:/etc/default/tmf/
 
 services:
-  apis:
-    build: .
-    restart: always
-    ports:
-      - "4848:4848"
-      - "8080:8080"
-    networks:
-      synchronicity:
-        aliases:
-          - apis.docker
+  productordering_db:
+    << : *default-mysql-service
     volumes:
-      - ./apis-config:/etc/default/tmf/
+      - ./apis-data/productordering:/var/lib/mysql:delegated
     environment:
-      - MYSQL_ROOT_PASSWORD=my-secret-pw
-      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=DSPRODUCTORDERING
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+
+  productordering:
+    << : *default-app-service
+    build: .
+    depends_on:
+      - productordering_db
+    ports:
+      - "8080:8080"
+    environment:
+      - MYSQL_DATABASE=DSPRODUCTORDERING
+      - MYSQL_HOST=productordering_db
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+
+  productinventory_db:
+    << : *default-mysql-service
+    volumes:
+      - ./apis-data/productinventory:/var/lib/mysql:delegated
+    environment:
+      - MYSQL_DATABASE=DSPRODUCTINVENTORY
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+
+  productinventory:
+    << : *default-app-service
+    depends_on:
+      - productinventory_db
+      - productordering
+    ports:
+      - "8081:8080"
+    environment:
+      - MYSQL_DATABASE=DSPRODUCTINVENTORY
+      - MYSQL_HOST=productinventory_db
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+
+  partymanagement_db:
+    << : *default-mysql-service
+    volumes:
+      - ./apis-data/partymanagement:/var/lib/mysql:delegated
+    environment:
+      - MYSQL_DATABASE=DSPARTYMANAGEMENT
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+
+  partymanagement:
+    << : *default-app-service
+    depends_on:
+      - partymanagement_db
+      - productordering
+    ports:
+      - "8082:8080"
+    environment:
+      - MYSQL_DATABASE=DSPARTYMANAGEMENT
+      - MYSQL_HOST=partymanagement_db
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+
+  billingmanagement_db:
+    << : *default-mysql-service
+    volumes:
+      - ./apis-data/billingmanagement:/var/lib/mysql:delegated
+    environment:
+      - MYSQL_DATABASE=DSBILLINGMANAGEMENT
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+
+  billingmanagement:
+    << : *default-app-service
+    depends_on:
+      - billingmanagement_db
+      - productordering
+    ports:
+      - "8083:8080"
+    environment:
+      - MYSQL_DATABASE=DSBILLINGMANAGEMENT
+      - MYSQL_HOST=billingmanagement_db
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+
+  customer_db:
+    << : *default-mysql-service
+    volumes:
+      - ./apis-data/customer:/var/lib/mysql:delegated
+    environment:
+      - MYSQL_DATABASE=DSCUSTOMER
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+
+  customer:
+    << : *default-app-service
+    depends_on:
+      - customer_db
+      - productordering
+    ports:
+      - "8084:8080"
+    environment:
+      - MYSQL_DATABASE=DSCUSTOMER
+      - MYSQL_HOST=customer_db
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+
+  usagemanagement_db:
+    << : *default-mysql-service
+    volumes:
+      - ./apis-data/usagemanagement:/var/lib/mysql:delegated
+    environment:
+      - MYSQL_DATABASE=DSUSAGEMANAGEMENT
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+
+  usagemanagement:
+    << : *default-app-service
+    depends_on:
+      - usagemanagement_db
+      - productordering
+    ports:
+      - "8085:8080"
+    environment:
+      - MYSQL_DATABASE=DSUSAGEMANAGEMENT
+      - MYSQL_HOST=usagemanagement_db
+      - MYSQL_USER=tmfapis
+      - MYSQL_PASSWORD=password
 
 networks:
-  synchronicity:
-    external: true
+  tmf-apis: {}
