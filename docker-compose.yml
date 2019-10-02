@@ -22,7 +22,7 @@ services:
   productordering_db:
     << : *default-mysql-service
     volumes:
-      - ./apis-data/productordering:/var/lib/mysql
+      - ./apis-data/productordering:/var/lib/mysql:delegated
     environment:
       - MYSQL_DATABASE=DSPRODUCTORDERING
       - MYSQL_USER=tmfapis
@@ -43,7 +43,7 @@ services:
   productinventory_db:
     << : *default-mysql-service
     volumes:
-      - ./apis-data/productinventory:/var/lib/mysql
+      - ./apis-data/productinventory:/var/lib/mysql:delegated
     environment:
       - MYSQL_DATABASE=DSPRODUCTINVENTORY
       - MYSQL_USER=tmfapis
@@ -64,7 +64,7 @@ services:
   partymanagement_db:
     << : *default-mysql-service
     volumes:
-      - ./apis-data/partymanagement:/var/lib/mysql
+      - ./apis-data/partymanagement:/var/lib/mysql:delegated
     environment:
       - MYSQL_DATABASE=DSPARTYMANAGEMENT
       - MYSQL_USER=tmfapis
@@ -85,7 +85,7 @@ services:
   billingmanagement_db:
     << : *default-mysql-service
     volumes:
-      - ./apis-data/billingmanagement:/var/lib/mysql
+      - ./apis-data/billingmanagement:/var/lib/mysql:delegated
     environment:
       - MYSQL_DATABASE=DSBILLINGMANAGEMENT
       - MYSQL_USER=tmfapis
@@ -106,7 +106,7 @@ services:
   # customer_db:
   #   << : *default-mysql-service
   #   volumes:
-  #     - ./apis-data/customer:/var/lib/mysql
+  #     - ./apis-data/customer:/var/lib/mysql:delegated
   #   environment:
   #     - MYSQL_DATABASE=DSCUSTOMER
   #     - MYSQL_USER=tmfapis
@@ -127,7 +127,7 @@ services:
   # usagemanagement_db:
   #   << : *default-mysql-service
   #   volumes:
-  #     - ./apis-data/usagemanagement:/var/lib/mysql
+  #     - ./apis-data/usagemanagement:/var/lib/mysql:delegated
   #   environment:
   #     - MYSQL_DATABASE=DSUSAGEMANAGEMENT
   #     - MYSQL_USER=tmfapis
